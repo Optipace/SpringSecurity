@@ -1,22 +1,18 @@
 package com.example.auth_service.config;
 
+import com.example.auth_service.websocket.NotificationWebSocketHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
-@EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+@EnableWebSocket
+@RequiredArgsConstructor
+public class WebSocketConfig implements WebSocketConfigurer {
+    private final NotificationWebSocketHandler notificationWebSocketHandler;
     @Override
-    public void registerStompEndpoints(StompEndpointRegistry stompEndpointRegistry){
-        stompEndpointRegistry.addEndpoint("/ws").setAllowedOriginPatterns("*");
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry){
+        webSocketHandlerRegistry.addHandler(notificationWebSocketHandler,"/ws").setAllowedOriginPatterns("*");
     }
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry messageBrokerRegistry){
-        messageBrokerRegistry.enableSimpleBroker("/topic");
-        messageBrokerRegistry.setApplicationDestinationPrefixes("/app");
     }
 
-}

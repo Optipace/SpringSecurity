@@ -4,17 +4,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.bouncycastle.jcajce.BCFKSLoadStoreParameter;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.sql.Time;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.function.Function;
-
 
 @Component
 public class JWTUtil{
@@ -27,9 +22,11 @@ public class JWTUtil{
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
+
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
+
     public boolean validateToken(String token,UserDetails userDetails){
         String username=extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
@@ -58,4 +55,3 @@ public class JWTUtil{
         return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
     }
 }
-// test
