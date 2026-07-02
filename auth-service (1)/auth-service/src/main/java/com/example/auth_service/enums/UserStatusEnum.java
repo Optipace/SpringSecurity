@@ -1,6 +1,6 @@
 package com.example.auth_service.enums;
 
-public enum UserStatus {
+public enum UserStatusEnum {
     ACTIVE,
     INACTIVE
 }

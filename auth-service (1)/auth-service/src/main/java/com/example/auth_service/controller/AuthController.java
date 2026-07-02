@@ -1,8 +1,6 @@
 package com.example.auth_service.controller;
 
-import com.example.auth_service.dto.LoginRequest;
-import com.example.auth_service.dto.RegisterRequest;
-import com.example.auth_service.dto.UserResponse;
+import com.example.auth_service.dto.*;
 import com.example.auth_service.entity.User;
 import com.example.auth_service.service.AuthService;
 import jakarta.validation.Valid;
@@ -30,5 +28,10 @@ public class AuthController {
     @GetMapping("/profile")
     public ResponseEntity<UserResponse> userResponseDetails(Authentication authentication) {
         return ResponseEntity.ok(authService.userResponseDetails(authentication.getName()));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshResponse> generateRefreshToken(@RequestBody RefreshRequest refreshRequest) {
+        return ResponseEntity.ok(authService.generateRefreshToken(refreshRequest));
     }
 }

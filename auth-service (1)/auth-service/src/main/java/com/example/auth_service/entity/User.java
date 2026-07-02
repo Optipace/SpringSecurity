@@ -1,6 +1,7 @@
 package com.example.auth_service.entity;
 
-import com.example.auth_service.enums.UserStatus;
+import com.example.auth_service.enums.UserRoleEnum;
+import com.example.auth_service.enums.UserStatusEnum;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,19 +10,22 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String username;
+    private String email;
+    private String password;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatusEnum status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRoleEnum role;
+
     public Long getId() {
         return id;
     }
     public void setId(Long id) {
         this.id = id;
     }
-
-    private String username;
-    private String email;
-    private String password;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserStatus status;
 
     public String getUsername() {
         return username;
@@ -44,11 +48,17 @@ public class User {
         this.password = password;
     }
 
-    public UserStatus getStatus() {
+    public UserStatusEnum getStatus() {
         return status;
     }
-
-    public void setStatus(UserStatus status) {
+    public void setStatus(UserStatusEnum status) {
         this.status = status;
+    }
+
+    public UserRoleEnum getRole() {
+        return role;
+    }
+    public void setRole(UserRoleEnum role) {
+        this.role = role;
     }
 }

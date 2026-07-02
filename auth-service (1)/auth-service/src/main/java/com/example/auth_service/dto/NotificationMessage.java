@@ -7,6 +7,7 @@ public class NotificationMessage {
     private Long userId;
     private String title;
     private String message;
+
     public Long getUserId() {
         return userId;
     }

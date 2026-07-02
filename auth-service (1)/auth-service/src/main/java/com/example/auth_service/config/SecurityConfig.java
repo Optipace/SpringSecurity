@@ -27,9 +27,11 @@ public class SecurityConfig {
         httpSecurity.csrf(csrf->csrf.disable())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/auth/register","/auth/login")
+                        .requestMatchers("/auth/register","/auth/login","/auth/refresh")
                         .permitAll()
                         .requestMatchers("/auth/profile").authenticated()
+                        .requestMatchers("/users/register").hasRole("ADMIN")
+                        .requestMatchers("/users/profile").hasAnyRole("ADMIN","USER")
                         .anyRequest().authenticated())
                         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
