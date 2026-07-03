@@ -1,6 +1,5 @@
 package com.example.auth_service.entity;
 
-import com.example.auth_service.enums.UserRoleEnum;
 import com.example.auth_service.enums.UserStatusEnum;
 import jakarta.persistence.*;
 
@@ -16,9 +15,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatusEnum status;
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserRoleEnum role;
+    private String role;
 
     public Long getId() {
         return id;
@@ -55,10 +53,10 @@ public class User {
         this.status = status;
     }
 
-    public UserRoleEnum getRole() {
+    public String getRole() {
         return role;
     }
-    public void setRole(UserRoleEnum role) {
+    public void setRole(String role) {
         this.role = role;
     }
 }

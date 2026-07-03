@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -39,6 +40,7 @@ public class AuthService {
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setStatus(UserStatusEnum.ACTIVE);
+        user.setRole(registerRequest.getRole());
         userRepository.save(user);
         System.out.println("User got saved" + user.getId());
         Role role=roleRepository.findByRoleName("USER").orElseThrow(()->new RuntimeException("Role not found"));
@@ -58,7 +60,7 @@ public class AuthService {
         String accessToken = jwtUtil.generateToken(loginRequest.getUsername());
         String refreshToken = UUID.randomUUID().toString();
         User user = userRepository.findByUsername(loginRequest.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
-        UserRole userRole=userRoleRepository.findByUsername(loginRequest.getUsername()).orElseThrow(()->new RuntimeException("No user found"));
+        UserRole userRole=userRoleRepository.findByUserUsername(user.getUsername()).orElseThrow(()->new UsernameNotFoundException("User role not found"));
         Role role=roleRepository.findByRoleName("USER").orElseThrow(()->new RuntimeException("Role not found"));
         RefreshToken refreshTokenObject = new RefreshToken();
         refreshTokenObject.setToken(refreshToken);
@@ -67,11 +69,6 @@ public class AuthService {
         System.out.println(refreshTokenObject);
         refreshTokenRepository.save(refreshTokenObject);
         return ResponseEntity.ok(new LoginResponse(accessToken, refreshToken));
-    }
-
-    public UserResponse userResponseDetails(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        return new UserResponse(user.getId(), user.getUsername(), user.getEmail());
     }
 
     public RefreshResponse generateRefreshToken(RefreshRequest refreshRequest) {

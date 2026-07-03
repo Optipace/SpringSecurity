@@ -13,6 +13,7 @@ import com.example.auth_service.repository.UserRoleRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -22,13 +23,13 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    public User register(RegisterRequest registerRequest) {
-        Role roleObject = new Role();
+    public User addUser(RegisterRequest registerRequest) {
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setStatus(UserStatusEnum.ACTIVE);
+        user.setRole(registerRequest.getRole());
         userRepository.save(user);
         System.out.println("User got saved" + user.getId());
         Role role = roleRepository.findByRoleName("USER").orElseThrow(() -> new RuntimeException("Role not found"));
@@ -43,8 +44,26 @@ public class UserService {
         return user;
     }
 
-    public UserResponse userResponseDetails(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        return new UserResponse(user.getId(), user.getUsername(), user.getEmail());
+    public UserResponse getUser(Long id) {
+        User user=userRepository.findById(id).orElseThrow(()->new RuntimeException("User not found"));
+        UserResponse userResponse=new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setUsername(user.getUsername());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setStatus(user.getStatus());
+        return userResponse;
+    }
+
+    public List<UserResponse> getAllUsers() {
+        List<User> users=userRepository.findAll();
+        return users.stream().map(user->
+        {
+            UserResponse userResponse=new UserResponse();
+            userResponse.setId(user.getId());
+            userResponse.setUsername(user.getUsername());
+            userResponse.setEmail(user.getEmail());
+            userResponse.setStatus(user.getStatus());
+            return userResponse;
+        }).toList();
     }
 }

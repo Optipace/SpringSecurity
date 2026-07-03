@@ -7,21 +7,26 @@ import com.example.auth_service.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
-    @PostMapping("/register")
-    public User register(@Valid @RequestBody RegisterRequest registerRequest) {
-        return userService.register(registerRequest);
+    @PostMapping()
+    public User addUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        return userService.addUser(registerRequest);
     }
 
-    @GetMapping("/profile")
-    public ResponseEntity<UserResponse> userResponseDetails(Authentication authentication) {
-        return ResponseEntity.ok(userService.userResponseDetails(authentication.getName()));
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUser(id));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 }

@@ -8,12 +8,13 @@ public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String permission_name;
+    @Column(name="permission_name")
+    private String permissionName;
 
-    public String getPermission_name() {
-        return permission_name;
+    public String getPermissionName() {
+        return permissionName;
     }
-    public void setPermission_name(String permission_name) {
-        this.permission_name = permission_name;
+    public void setPermissionName(String permission_name) {
+        this.permissionName = permission_name;
     }
 }

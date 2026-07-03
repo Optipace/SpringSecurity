@@ -1,20 +1,37 @@
 package com.example.auth_service.security;
 
+import com.example.auth_service.entity.Role;
+import com.example.auth_service.entity.RolePermission;
 import com.example.auth_service.entity.User;
+import com.example.auth_service.entity.UserRole;
+import com.example.auth_service.repository.RolePermissionRepository;
+import com.example.auth_service.repository.RoleRepository;
 import com.example.auth_service.repository.UserRepository;
+import com.example.auth_service.repository.UserRoleRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
+    private final UserRoleRepository userRoleRepository;
+    private final RolePermissionRepository rolePermissionRepository;
+    private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
         User user = userRepository.findByUsername(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
-        return new CustomUserDetails(user);
+        UserRole userRole=userRoleRepository.findByUserUsername(user.getUsername()).orElseThrow(()->new RuntimeException("User not found"));
+        Role role=userRole.getRole();
+        List<RolePermission> rolePermissions=rolePermissionRepository.findByRole(role);
+        List<GrantedAuthority> authorities=rolePermissions.stream().map(rolePermission->(GrantedAuthority)new SimpleGrantedAuthority(rolePermission.getPermission().getPermissionName())).toList();
+        System.out.println("authorities: "+authorities);
+        return new CustomUserDetails(user,authorities);
     }
 }
