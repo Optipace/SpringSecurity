@@ -22,10 +22,12 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException{
         String authHeader=httpServletRequest.getHeader("Authorization");
+        System.out.println("Authorizatio header: "+authHeader);
         String token=null;
         String username=null;
         if(authHeader!=null && authHeader.startsWith("Bearer ")){
             token=authHeader.substring(7);
+            System.out.println("Token: "+token);
             username=jwtUtil.extractUsername(token);
         }
         if(username!=null && SecurityContextHolder.getContext().getAuthentication()==null){

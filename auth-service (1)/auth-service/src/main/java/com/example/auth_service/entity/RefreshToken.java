@@ -14,6 +14,7 @@ public class RefreshToken {
     @JoinColumn(name="user_id")
     private User user;
     private LocalDateTime expiryDate;
+    private boolean revoked;
 
     public Long getId() {
         return id;
@@ -41,5 +42,12 @@ public class RefreshToken {
     }
     public void setExpiryDate(LocalDateTime expiryDate) {
         this.expiryDate = expiryDate;
+    }
+
+    public boolean isRevoked() {
+        return revoked;
+    }
+    public void setRevoked(boolean revoked) {
+        this.revoked = revoked;
     }
 }

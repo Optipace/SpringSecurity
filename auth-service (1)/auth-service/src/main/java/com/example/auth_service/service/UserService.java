@@ -2,6 +2,7 @@ package com.example.auth_service.service;
 
 import com.example.auth_service.dto.NotificationMessage;
 import com.example.auth_service.dto.RegisterRequest;
+import com.example.auth_service.dto.UpdateRequest;
 import com.example.auth_service.dto.UserResponse;
 import com.example.auth_service.entity.Role;
 import com.example.auth_service.entity.User;
@@ -23,6 +24,8 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
+
     public User addUser(RegisterRequest registerRequest) {
         User user = new User();
         user.setUsername(registerRequest.getUsername());
@@ -65,5 +68,55 @@ public class UserService {
             userResponse.setStatus(user.getStatus());
             return userResponse;
         }).toList();
+    }
+
+    public UserResponse updateUser(Long id, UpdateRequest updateRequest) {
+        User user=userRepository.findById(id).orElseThrow(()->new RuntimeException("No user found"));
+        if(updateRequest.getUsername()!=null){
+            user.setUsername(updateRequest.getUsername());
+        }
+        if(updateRequest.getEmail()!=null){
+            user.setEmail(updateRequest.getEmail());
+        }
+        if(updateRequest.getPassword()!=null){
+            user.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
+        }
+        auditService.save(updateRequest.getUsername(),"PASSWORD_CHANGE","User changed password");
+        if(updateRequest.getRole()!=null){
+            user.setRole(updateRequest.getRole());
+            UserRole userRole=userRoleRepository.findByUserUsername(user.getUsername()).orElseThrow(()->new RuntimeException("User role not found"));
+            Role role=roleRepository.findByRoleName(updateRequest.getRole()).orElseThrow(()->new RuntimeException("Role not found"));
+            userRole.setRole(role);
+            userRoleRepository.save(userRole);
+        }
+        auditService.save(updateRequest.getUsername(),"ROLE_CHANGE","Changed role of user");
+        userRepository.save(user);
+        UserResponse userResponse=new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setUsername(user.getUsername());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setStatus(user.getStatus());
+        userResponse.setRole(user.getRole());
+        return userResponse;
+    }
+
+    public void deleteUser(Long id) {
+        User user=userRepository.findById(id).orElseThrow(()->new RuntimeException("User not found"));
+        UserRole userRole=userRoleRepository.findByUserUsername(user.getUsername()).orElseThrow(()->new RuntimeException("User role not found"));
+        userRoleRepository.delete(userRole);
+        userRepository.delete(user);
+    }
+
+    public UserResponse getProfile(String name) {
+        User user=userRepository.findByUsername(name).orElseThrow(()->new RuntimeException("User not found"));
+        UserRole userRole=userRoleRepository.findByUserUsername(name).orElseThrow(()->new RuntimeException("Role not found"));
+        Role role=userRole.getRole();
+        UserResponse userResponse=new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setUsername(user.getUsername());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setStatus(user.getStatus());
+        userResponse.setRole(role.getRoleName());
+        return userResponse;
     }
 }

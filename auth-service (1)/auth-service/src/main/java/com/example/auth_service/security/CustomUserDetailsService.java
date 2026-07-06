@@ -30,8 +30,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         UserRole userRole=userRoleRepository.findByUserUsername(user.getUsername()).orElseThrow(()->new RuntimeException("User not found"));
         Role role=userRole.getRole();
         List<RolePermission> rolePermissions=rolePermissionRepository.findByRole(role);
+        System.out.println("Role: "+role.getRoleName());
         List<GrantedAuthority> authorities=rolePermissions.stream().map(rolePermission->(GrantedAuthority)new SimpleGrantedAuthority(rolePermission.getPermission().getPermissionName())).toList();
         System.out.println("authorities: "+authorities);
+        System.out.println("permission count: "+rolePermissions.size());
+        for(RolePermission rolePermission:rolePermissions){
+            System.out.println(rolePermission.getPermission().getPermissionName());
+        }
         return new CustomUserDetails(user,authorities);
     }
 }

@@ -1,10 +1,7 @@
 package com.example.auth_service.service;
 
 import com.example.auth_service.dto.*;
-import com.example.auth_service.entity.RefreshToken;
-import com.example.auth_service.entity.Role;
-import com.example.auth_service.entity.User;
-import com.example.auth_service.entity.UserRole;
+import com.example.auth_service.entity.*;
 import com.example.auth_service.enums.UserStatusEnum;
 import com.example.auth_service.repository.RefreshTokenRepository;
 import com.example.auth_service.repository.RoleRepository;
@@ -32,6 +29,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
+    private final AuditService auditService;
 
     public User register(RegisterRequest registerRequest) {
         Role roleObject=new Role();
@@ -42,8 +40,8 @@ public class AuthService {
         user.setStatus(UserStatusEnum.ACTIVE);
         user.setRole(registerRequest.getRole());
         userRepository.save(user);
-        System.out.println("User got saved" + user.getId());
-        Role role=roleRepository.findByRoleName("USER").orElseThrow(()->new RuntimeException("Role not found"));
+        System.out.println("user role: "+user.getRole());
+        Role role=roleRepository.findByRoleName(user.getRole()).orElseThrow(()->new RuntimeException("Role not found"));
         UserRole userRole=new UserRole();
         userRole.setUser(user);
         userRole.setRole(role);
@@ -68,12 +66,17 @@ public class AuthService {
         refreshTokenObject.setExpiryDate(LocalDateTime.now().plusDays(7));
         System.out.println(refreshTokenObject);
         refreshTokenRepository.save(refreshTokenObject);
+        auditService.save(loginRequest.getUsername(),"LOGIN","User logged in");
         return ResponseEntity.ok(new LoginResponse(accessToken, refreshToken));
+
     }
 
     public RefreshResponse generateRefreshToken(RefreshRequest refreshRequest) {
         System.out.println("starting this function     :");
         RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshRequest.getRefreshToken()).orElseThrow(() -> new RuntimeException("Refresh token not found"));
+        if(refreshToken.isRevoked()){
+            throw new RuntimeException("Refresh token revoked");
+        }
         System.out.println("REfresh token     :"+refreshToken);
         if (refreshToken == null || refreshToken.getExpiryDate().isBefore(LocalDateTime.now())){
             throw new RuntimeException("Invalid or expired refresh token");
@@ -81,5 +84,13 @@ public class AuthService {
             String accessToken = jwtUtil.generateToken(refreshToken.getUser().getUsername());
             System.out.println(accessToken);
             return new RefreshResponse(accessToken, refreshToken.getToken());
+        }
+
+        public void logout(String refreshToken){
+            RefreshToken token=refreshTokenRepository.findByToken(refreshToken).orElseThrow(()->new RuntimeException("Invalid refresh token"));
+            refreshTokenRepository.delete(token);
+            RefreshToken refreshTokenToSetRevoked=new RefreshToken();
+            refreshTokenToSetRevoked.setRevoked(true);
+            auditService.save(token.getUser().getUsername(),"LOGOUT","User logged out");
         }
     }

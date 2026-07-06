@@ -32,12 +32,12 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/auth/profile").authenticated()
                         .requestMatchers("/users/register").hasRole("ADMIN")
-                        .requestMatchers("/users/profile").hasAnyRole("ADMIN","USER")
                         .requestMatchers(HttpMethod.POST,"/users").hasAuthority("CREATE_USER")
                         .requestMatchers(HttpMethod.DELETE,"/users/**").hasAuthority("DELETE_USER")
-                        .requestMatchers(HttpMethod.PUT,"/users/**").hasAuthority("UPDATE_USER")
-                        .requestMatchers(HttpMethod.GET,"/users/**").hasAuthority("VIEW_USER")
-                        .requestMatchers(HttpMethod.GET,"/users").hasAuthority("VIEW_USER")
+                        .requestMatchers(HttpMethod.PATCH,"/users/**").hasAuthority("UPDATE_USER")
+                        .requestMatchers(HttpMethod.GET,"/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/users/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/users/profile").hasAuthority("VIEW_USER")
                         .anyRequest().authenticated())
                         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();

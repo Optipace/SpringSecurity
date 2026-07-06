@@ -8,10 +8,10 @@ public class RolePermission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="role_id")
     private Role role;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="permission_id")
     private Permission permission;
 

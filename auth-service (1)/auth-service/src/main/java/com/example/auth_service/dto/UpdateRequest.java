@@ -4,18 +4,30 @@ import com.example.auth_service.enums.UserStatusEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-@Data
-@AllArgsConstructor
-public class UserResponse {
+public class UpdateRequest {
     private Long id;
+
+    @NotBlank(message="Username is required")
+    @Size(min=3,max=20,message="Username must be between 3 and 20 characters")
     private String username;
+
+    @NotBlank(message="Email is required")
+    @Email(message="Invalid email format")
     private String email;
+
+    @NotBlank(message="Password is required")
+    @Size(min=8,message="Password must be at least 8 characters")
+    private String password;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatusEnum status;
+
+    @NotBlank(message ="Role is required")
     private String role;
 
     public Long getId() {
@@ -39,6 +51,13 @@ public class UserResponse {
         this.email = email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public UserStatusEnum getStatus() {
         return status;
     }
@@ -51,8 +70,5 @@ public class UserResponse {
     }
     public void setRole(String role) {
         this.role = role;
-    }
-
-    public UserResponse() {
     }
 }

@@ -28,4 +28,10 @@ public class AuthController {
     public ResponseEntity<RefreshResponse> generateRefreshToken(@RequestBody RefreshRequest refreshRequest) {
         return ResponseEntity.ok(authService.generateRefreshToken(refreshRequest));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestBody LogoutRequest logoutRequest) {
+        authService.logout(logoutRequest.getRefreshToken());
+        return ResponseEntity.ok("Logged out successfully");
+    }
 }

@@ -8,10 +8,10 @@ public class UserRole {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="user_id")
     private User user;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="role_id")
     private Role role;
 
