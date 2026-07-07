@@ -36,6 +36,7 @@ public class JWTUtil{
         Claims claims = Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
         return claims.getSubject();
     }
+
     private boolean isTokenExpired(String token){
         Date expirationDate=extractExpiration(token);
         Date currentDate=new Date();

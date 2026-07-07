@@ -28,16 +28,16 @@ public class SecurityConfig {
         httpSecurity.csrf(csrf->csrf.disable())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/auth/register","/auth/login","/auth/refresh")
+                        .requestMatchers("/auth/register","/auth/login","/auth/refresh","/auth/verify-otp")
                         .permitAll()
                         .requestMatchers("/auth/profile").authenticated()
                         .requestMatchers("/users/register").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST,"/users").hasAuthority("CREATE_USER")
                         .requestMatchers(HttpMethod.DELETE,"/users/**").hasAuthority("DELETE_USER")
                         .requestMatchers(HttpMethod.PATCH,"/users/**").hasAuthority("UPDATE_USER")
-                        .requestMatchers(HttpMethod.GET,"/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/users/profile").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/users/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/users/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/users/profile").hasAuthority("VIEW_USER")
                         .anyRequest().authenticated())
                         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();

@@ -54,6 +54,7 @@ public class UserService {
         userResponse.setUsername(user.getUsername());
         userResponse.setEmail(user.getEmail());
         userResponse.setStatus(user.getStatus());
+        userResponse.setRole(user.getRole());
         return userResponse;
     }
 
@@ -66,6 +67,7 @@ public class UserService {
             userResponse.setUsername(user.getUsername());
             userResponse.setEmail(user.getEmail());
             userResponse.setStatus(user.getStatus());
+            userResponse.setRole(user.getRole());
             return userResponse;
         }).toList();
     }
@@ -117,6 +119,7 @@ public class UserService {
         userResponse.setEmail(user.getEmail());
         userResponse.setStatus(user.getStatus());
         userResponse.setRole(role.getRoleName());
+        System.out.println("user response: "+userResponse);
         return userResponse;
     }
 }

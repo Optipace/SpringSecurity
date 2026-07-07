@@ -45,6 +45,7 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<UserResponse> getProfile(Authentication authentication) {
+        System.out.println("Inside get profile method");
         return ResponseEntity.ok(userService.getProfile(authentication.getName()));
     }
 }

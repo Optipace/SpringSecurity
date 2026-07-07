@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,7 +32,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         Role role=userRole.getRole();
         List<RolePermission> rolePermissions=rolePermissionRepository.findByRole(role);
         System.out.println("Role: "+role.getRoleName());
-        List<GrantedAuthority> authorities=rolePermissions.stream().map(rolePermission->(GrantedAuthority)new SimpleGrantedAuthority(rolePermission.getPermission().getPermissionName())).toList();
+        List<GrantedAuthority> authorities=new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_"+role.getRoleName()));
+        rolePermissions.forEach(rolePermission -> authorities.add(new SimpleGrantedAuthority(rolePermission.getPermission().getPermissionName())));
         System.out.println("authorities: "+authorities);
         System.out.println("permission count: "+rolePermissions.size());
         for(RolePermission rolePermission:rolePermissions){

@@ -3,16 +3,12 @@ package com.example.auth_service.service;
 import com.example.auth_service.dto.*;
 import com.example.auth_service.entity.*;
 import com.example.auth_service.enums.UserStatusEnum;
-import com.example.auth_service.repository.RefreshTokenRepository;
-import com.example.auth_service.repository.RoleRepository;
-import com.example.auth_service.repository.UserRepository;
-import com.example.auth_service.repository.UserRoleRepository;
+import com.example.auth_service.repository.*;
 import com.example.auth_service.util.JWTUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -21,6 +17,8 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class AuthService {
+    private final OtpService otpService;
+    private final OtpRepository otpRepository;
     private final UserRoleRepository userRoleRepository;
     private final RoleRepository roleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -30,6 +28,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
     private final AuditService auditService;
+    private final EmailService emailService;
 
     public User register(RegisterRequest registerRequest) {
         Role roleObject=new Role();
@@ -53,22 +52,10 @@ public class AuthService {
         return user;
     }
 
-    public ResponseEntity<?> login(LoginRequest loginRequest) {
+    public void login(LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-        String accessToken = jwtUtil.generateToken(loginRequest.getUsername());
-        String refreshToken = UUID.randomUUID().toString();
-        User user = userRepository.findByUsername(loginRequest.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
-        UserRole userRole=userRoleRepository.findByUserUsername(user.getUsername()).orElseThrow(()->new UsernameNotFoundException("User role not found"));
-        Role role=roleRepository.findByRoleName("USER").orElseThrow(()->new RuntimeException("Role not found"));
-        RefreshToken refreshTokenObject = new RefreshToken();
-        refreshTokenObject.setToken(refreshToken);
-        refreshTokenObject.setUser(user);
-        refreshTokenObject.setExpiryDate(LocalDateTime.now().plusDays(7));
-        System.out.println(refreshTokenObject);
-        refreshTokenRepository.save(refreshTokenObject);
-        auditService.save(loginRequest.getUsername(),"LOGIN","User logged in");
-        return ResponseEntity.ok(new LoginResponse(accessToken, refreshToken));
-
+        User user=userRepository.findByUsername(loginRequest.getUsername()).orElseThrow(()->new RuntimeException("User not found"));
+        otpService.sendOtp(user.getEmail());
     }
 
     public RefreshResponse generateRefreshToken(RefreshRequest refreshRequest) {
@@ -92,5 +79,23 @@ public class AuthService {
             RefreshToken refreshTokenToSetRevoked=new RefreshToken();
             refreshTokenToSetRevoked.setRevoked(true);
             auditService.save(token.getUser().getUsername(),"LOGOUT","User logged out");
+        }
+
+        public ResponseEntity<LoginResponse> verifyOtp(VerifyOtpRequest verifyOtpRequest){
+            boolean valid=otpService.verifyOtp(verifyOtpRequest.getEmail(),verifyOtpRequest.getOtp());
+            if(!valid){
+                throw new RuntimeException("Invalid or expired OTP");
+            }
+            User user=userRepository.findByEmail(verifyOtpRequest.getEmail()).orElseThrow(()->new RuntimeException("User not found"));
+            String accessToken = jwtUtil.generateToken(user.getUsername());
+            String refreshToken = UUID.randomUUID().toString();
+            RefreshToken refreshTokenObject = new RefreshToken();
+            refreshTokenObject.setToken(refreshToken);
+            refreshTokenObject.setUser(user);
+            refreshTokenObject.setExpiryDate(LocalDateTime.now().plusDays(7));
+            System.out.println(refreshTokenObject);
+            refreshTokenRepository.save(refreshTokenObject);
+            auditService.save(user.getUsername(),"LOGIN","User logged in");
+            return ResponseEntity.ok(new LoginResponse(accessToken, refreshToken));
         }
     }
