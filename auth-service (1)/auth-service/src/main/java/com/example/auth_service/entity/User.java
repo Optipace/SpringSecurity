@@ -17,6 +17,8 @@ public class User {
     private UserStatusEnum status;
     @Column(nullable = false)
     private String role;
+    @Column(nullable = false)
+    private boolean blocked=false;
 
     public Long getId() {
         return id;
@@ -58,5 +60,12 @@ public class User {
     }
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 }

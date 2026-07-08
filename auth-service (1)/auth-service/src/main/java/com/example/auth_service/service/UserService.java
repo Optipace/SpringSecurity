@@ -122,4 +122,29 @@ public class UserService {
         System.out.println("user response: "+userResponse);
         return userResponse;
     }
+
+    public String revokeAdminRole(Long id) {
+        User user=userRepository.findById(id).orElseThrow(()->new RuntimeException("User not found"));
+        UserRole userRole=userRoleRepository.findById(id).orElseThrow(()->new RuntimeException("User role not found"));
+        Role role=roleRepository.findByRoleName("USER").orElseThrow(()->new RuntimeException("Role not found"));
+        userRole.setRole(role);
+        userRoleRepository.save(userRole);
+        user.setRole(role.getRoleName());
+        userRepository.save(user);
+        return "Admin Role Revoked Successfully";
+    }
+
+    public String blockUser(Long id){
+        User user=userRepository.findById(id).orElseThrow(()->new RuntimeException("User not found"));
+        user.setBlocked(true);
+        userRepository.save(user);
+        return "User Blocked Successfully";
+    }
+
+    public String unblockUser(Long id){
+        User user=userRepository.findById(id).orElseThrow(()->new RuntimeException("User not found"));
+        user.setBlocked(false);
+        userRepository.save(user);
+        return "User Unblocked Successfully";
+    }
 }

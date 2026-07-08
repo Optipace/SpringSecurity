@@ -9,6 +9,7 @@ import com.example.auth_service.repository.RoleRepository;
 import com.example.auth_service.repository.UserRepository;
 import com.example.auth_service.repository.UserRoleRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +29,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
         User user = userRepository.findByUsername(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
+        if(user.isBlocked()){
+            throw new DisabledException("User account is blocked");
+        }
         UserRole userRole=userRoleRepository.findByUserUsername(user.getUsername()).orElseThrow(()->new RuntimeException("User not found"));
         Role role=userRole.getRole();
         List<RolePermission> rolePermissions=rolePermissionRepository.findByRole(role);

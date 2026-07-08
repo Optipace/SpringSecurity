@@ -81,21 +81,23 @@ public class AuthService {
             auditService.save(token.getUser().getUsername(),"LOGOUT","User logged out");
         }
 
-        public ResponseEntity<LoginResponse> verifyOtp(VerifyOtpRequest verifyOtpRequest){
+        public LoginResponse verifyOtp(VerifyOtpRequest verifyOtpRequest){
             boolean valid=otpService.verifyOtp(verifyOtpRequest.getEmail(),verifyOtpRequest.getOtp());
+            System.out.println("Valid: "+valid);
             if(!valid){
                 throw new RuntimeException("Invalid or expired OTP");
             }
             User user=userRepository.findByEmail(verifyOtpRequest.getEmail()).orElseThrow(()->new RuntimeException("User not found"));
+            System.out.println("user: "+user);
             String accessToken = jwtUtil.generateToken(user.getUsername());
             String refreshToken = UUID.randomUUID().toString();
             RefreshToken refreshTokenObject = new RefreshToken();
             refreshTokenObject.setToken(refreshToken);
             refreshTokenObject.setUser(user);
-            refreshTokenObject.setExpiryDate(LocalDateTime.now().plusDays(7));
+            refreshTokenObject.setExpiryDate(LocalDateTime.now().plusDays(1));
             System.out.println(refreshTokenObject);
             refreshTokenRepository.save(refreshTokenObject);
             auditService.save(user.getUsername(),"LOGIN","User logged in");
-            return ResponseEntity.ok(new LoginResponse(accessToken, refreshToken));
+            return new LoginResponse(accessToken, refreshToken);
         }
     }

@@ -13,39 +13,54 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
-    @PostMapping()
+
+    @PostMapping("/admin/users")
     public User addUser(@Valid @RequestBody RegisterRequest registerRequest) {
         return userService.addUser(registerRequest);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/users/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUser(id));
     }
 
-    @GetMapping("/all")
+    @GetMapping("/admin/users/all")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id,@RequestBody UpdateRequest updateRequest) {
-        return ResponseEntity.ok(userService.updateUser(id,updateRequest));
+    @PatchMapping("/admin/users/{id}")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UpdateRequest updateRequest) {
+        return ResponseEntity.ok(userService.updateUser(id, updateRequest));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/users/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully");
     }
 
-    @GetMapping("/profile")
+    @GetMapping("/users/profile")
     public ResponseEntity<UserResponse> getProfile(Authentication authentication) {
         System.out.println("Inside get profile method");
         return ResponseEntity.ok(userService.getProfile(authentication.getName()));
+    }
+
+    @PutMapping("/admin/{id}/revoke-admin")
+    public ResponseEntity<String> revokeAdminRole(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.revokeAdminRole(id));
+    }
+
+    @PatchMapping("/admin/users/{id}/block")
+    public ResponseEntity<String> blockUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.blockUser(id));
+    }
+
+    @PatchMapping("/admin/users/{id}/unblock")
+    public ResponseEntity<String> unblockUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.unblockUser(id));
     }
 }

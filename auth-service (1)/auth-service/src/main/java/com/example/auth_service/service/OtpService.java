@@ -34,15 +34,22 @@ public class OtpService {
             otpEntity.setExpiry_time(LocalDateTime.now().plusMinutes(5));
         }
         otpRepository.save(otpEntity);
+        System.out.println("saved email: "+otpEntity.getEmail());
+        System.out.println("saved otp: "+otpEntity.getOtp());
         emailService.sendEmail("anjala050@gmail.com", "OTP Verification", "Your OTP is: " + otp + "\n\nThis OTP is valid for 5 minutes");
     }
 
     public boolean verifyOtp(String email,String otp){
+        System.out.println("starting this line");
+        System.out.println("Email from request: "+email);
+        System.out.println("OTP from request: "+otp);
         Optional<Otp> optionalOtp=otpRepository.findByEmail(email);
+        System.out.println("optionalOtp: "+optionalOtp);
         if(optionalOtp.isEmpty()){
             return false;
         }
         Otp otpEntity=optionalOtp.get();
+        System.out.println("otp entity: "+otpEntity);
         if(!otpEntity.getOtp().equals(otp)){
             return false;
         }
@@ -50,6 +57,7 @@ public class OtpService {
             return false;
         }
         otpRepository.delete(otpEntity);
+        System.out.println("reached this line");
         return true;
     }
 }

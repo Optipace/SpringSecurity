@@ -13,12 +13,13 @@ import java.util.function.Function;
 
 @Component
 public class JWTUtil{
+    private static final long ACCESS_TOKEN_EXPIRATION=15*60*1000;
     private final String SECRET_KEY="mysscretkeymysecretkeymysecretkey123456";
     public String generateToken(String username){
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis()+86400000))
+                .setExpiration(new Date(System.currentTimeMillis()+ACCESS_TOKEN_EXPIRATION))
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }

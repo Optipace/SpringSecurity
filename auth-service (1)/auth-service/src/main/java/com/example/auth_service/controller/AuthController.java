@@ -6,6 +6,7 @@ import com.example.auth_service.service.AuthService;
 import com.example.auth_service.service.OtpService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +29,12 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<RefreshResponse> generateRefreshToken(@RequestBody RefreshRequest refreshRequest) {
-        return ResponseEntity.ok(authService.generateRefreshToken(refreshRequest));
+    public ResponseEntity<?> generateRefreshToken(@RequestBody RefreshRequest refreshRequest) {
+        try{
+            return ResponseEntity.ok(authService.generateRefreshToken(refreshRequest));
+        }catch (RuntimeException runtimeException){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(runtimeException.getMessage());
+        }
     }
 
     @PostMapping("/logout")
@@ -45,11 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpRequest verifyOtpRequest) {
-        boolean verified= otpService.verifyOtp(verifyOtpRequest.getEmail(), verifyOtpRequest.getOtp());
-        if(verified){
-            return ResponseEntity.ok("OTP Verified Successfully");
-        }
-        return ResponseEntity.badRequest().body("Invalid OTP");
+    public ResponseEntity<LoginResponse> verifyOtp(@RequestBody VerifyOtpRequest verifyOtpRequest) {
+        return ResponseEntity.ok(authService.verifyOtp(verifyOtpRequest));
     }
 }
