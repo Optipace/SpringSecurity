@@ -1,6 +1,7 @@
 package com.example.auth_service.config;
 
-import com.example.auth_service.security.JWTFilter;
+import com.example.auth_service.filter.JWTFilter;
+import com.example.auth_service.filter.RateLimitFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +25,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
+    public RateLimitFilter rateLimitFilter(){
+        return new RateLimitFilter();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,RateLimitFilter rateLimitFilter) throws Exception{
         httpSecurity.csrf(csrf->csrf.disable())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth
@@ -42,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH,"/admin/users/{id}/block").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH,"/admin/users/{id}/unblock").hasRole("ADMIN")
                         .anyRequest().authenticated())
+                        .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }

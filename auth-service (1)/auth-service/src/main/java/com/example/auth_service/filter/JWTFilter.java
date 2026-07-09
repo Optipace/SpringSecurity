@@ -1,5 +1,6 @@
-package com.example.auth_service.security;
+package com.example.auth_service.filter;
 
+import com.example.auth_service.security.CustomUserDetailsService;
 import com.example.auth_service.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;

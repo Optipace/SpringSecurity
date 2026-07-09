@@ -1,7 +1,6 @@
 package com.example.auth_service.controller;
 
 import com.example.auth_service.dto.*;
-import com.example.auth_service.entity.User;
 import com.example.auth_service.service.AuthService;
 import com.example.auth_service.service.OtpService;
 import jakarta.validation.Valid;
@@ -18,12 +17,14 @@ public class AuthController {
     private final OtpService otpService;
 
     @PostMapping("/register")
-    public User register(@Valid @RequestBody RegisterRequest registerRequest) {
-        return authService.register(registerRequest);
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        System.out.println("Reached register method");
+        authService.register(registerRequest);
+        return ResponseEntity.ok("User registered successfully");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest) {
         authService.login(loginRequest);
         return ResponseEntity.ok("OTP sent to your mail");
     }

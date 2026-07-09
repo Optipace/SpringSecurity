@@ -3,6 +3,7 @@ package com.example.auth_service.controller;
 import com.example.auth_service.dto.RegisterRequest;
 import com.example.auth_service.dto.UpdateRequest;
 import com.example.auth_service.dto.UserResponse;
+import com.example.auth_service.entity.Permission;
 import com.example.auth_service.entity.User;
 import com.example.auth_service.service.UserService;
 import jakarta.validation.Valid;
@@ -62,5 +63,23 @@ public class UserController {
     @PatchMapping("/admin/users/{id}/unblock")
     public ResponseEntity<String> unblockUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.unblockUser(id));
+    }
+
+    @PostMapping("/admin/permissions")
+    public ResponseEntity<String> createPermission(@RequestBody Permission permission){
+        userService.createPermission(permission);
+        return ResponseEntity.ok("Permission created");
+    }
+
+    @PostMapping("/admin/roles/{roleId}/permissions/{permissionId}")
+    public ResponseEntity<String> assignPermission(@PathVariable Long roleId,@PathVariable Long permissionId){
+        userService.assignPermission(roleId,permissionId);
+        return ResponseEntity.ok("Permission assigned");
+    }
+
+    @DeleteMapping("/admin/roles/{roleId}/permissions/{permissionId}")
+    public ResponseEntity<String> deletePermission(@PathVariable Long roleId,Long permissionId) {
+        userService.deletePermission(roleId,permissionId);
+        return ResponseEntity.ok("Permission deleted successfully");
     }
 }

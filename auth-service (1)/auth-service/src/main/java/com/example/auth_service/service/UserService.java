@@ -4,13 +4,9 @@ import com.example.auth_service.dto.NotificationMessage;
 import com.example.auth_service.dto.RegisterRequest;
 import com.example.auth_service.dto.UpdateRequest;
 import com.example.auth_service.dto.UserResponse;
-import com.example.auth_service.entity.Role;
-import com.example.auth_service.entity.User;
-import com.example.auth_service.entity.UserRole;
+import com.example.auth_service.entity.*;
 import com.example.auth_service.enums.UserStatusEnum;
-import com.example.auth_service.repository.RoleRepository;
-import com.example.auth_service.repository.UserRepository;
-import com.example.auth_service.repository.UserRoleRepository;
+import com.example.auth_service.repository.*;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +15,8 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class UserService {
+    private final RolePermissionRepository rolePermissionRepository;
+    private final PermissionRepository permissionRepository;
     private final NotificationService notificationService;
     private final UserRoleRepository userRoleRepository;
     private final RoleRepository roleRepository;
@@ -146,5 +144,23 @@ public class UserService {
         user.setBlocked(false);
         userRepository.save(user);
         return "User Unblocked Successfully";
+    }
+
+    public void createPermission(Permission permission) {
+        permissionRepository.save(permission);
+    }
+
+    public void assignPermission(Long roleId, Long permissionId) {
+        Role role=roleRepository.findById(roleId).orElseThrow();
+        Permission permission=permissionRepository.findById(permissionId).orElseThrow();
+        RolePermission rolePermission=new RolePermission();
+        rolePermission.setRole(role);
+        rolePermission.setPermission(permission);
+        rolePermissionRepository.save(rolePermission);
+    }
+
+    public void deletePermission(Long roleId,Long permissionId) {
+        RolePermission rolePermission=rolePermissionRepository.findByRoleIdAndPermissionId(roleId,permissionId).orElseThrow();
+        rolePermissionRepository.delete(rolePermission);
     }
 }
