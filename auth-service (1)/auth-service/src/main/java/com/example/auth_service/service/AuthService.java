@@ -6,7 +6,8 @@ import com.example.auth_service.enums.UserStatusEnum;
 import com.example.auth_service.repository.*;
 import com.example.auth_service.util.JWTUtil;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +30,7 @@ public class AuthService {
     private final JWTUtil jwtUtil;
     private final AuditService auditService;
     private final EmailService emailService;
+    private static final Logger logger= LoggerFactory.getLogger(AuditService.class);
 
     public User register(RegisterRequest registerRequest) {
         Role roleObject=new Role();
@@ -70,6 +72,8 @@ public class AuthService {
         }
             String accessToken = jwtUtil.generateToken(refreshToken.getUser().getUsername());
             System.out.println(accessToken);
+            logger.info("Token refreshed successfully",accessToken);
+            auditService.save(refreshToken.getUser().getUsername(),"REFRESH","Token refresh");
             return new RefreshResponse(accessToken, refreshToken.getToken());
         }
 
@@ -78,6 +82,7 @@ public class AuthService {
             refreshTokenRepository.delete(token);
             RefreshToken refreshTokenToSetRevoked=new RefreshToken();
             refreshTokenToSetRevoked.setRevoked(true);
+            logger.info("User {} logged out successfully",token.getUser().getUsername());
             auditService.save(token.getUser().getUsername(),"LOGOUT","User logged out");
         }
 
@@ -85,6 +90,7 @@ public class AuthService {
             boolean valid=otpService.verifyOtp(verifyOtpRequest.getEmail(),verifyOtpRequest.getOtp());
             System.out.println("Valid: "+valid);
             if(!valid){
+                logger.warn("LOGIN FAILED");
                 throw new RuntimeException("Invalid or expired OTP");
             }
             User user=userRepository.findByEmail(verifyOtpRequest.getEmail()).orElseThrow(()->new RuntimeException("User not found"));
@@ -97,6 +103,9 @@ public class AuthService {
             refreshTokenObject.setExpiryDate(LocalDateTime.now().plusDays(1));
             System.out.println(refreshTokenObject);
             refreshTokenRepository.save(refreshTokenObject);
+            logger.info("Refresh token generated");
+            auditService.save(user.getUsername(),"REFRESH TOKEN GENERATION","Refresh token generated");
+            logger.info("User {} logged in successfully",user.getUsername());
             auditService.save(user.getUsername(),"LOGIN","User logged in");
             return new LoginResponse(accessToken, refreshToken);
         }

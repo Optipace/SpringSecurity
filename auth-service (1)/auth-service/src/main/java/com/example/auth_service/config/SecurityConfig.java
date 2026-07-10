@@ -31,7 +31,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,RateLimitFilter rateLimitFilter) throws Exception{
-        httpSecurity.csrf(csrf->csrf.disable())
+        httpSecurity
+                .cors(cors->{})
+                .csrf(csrf->csrf.disable())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth
                         .requestMatchers("/auth/register","/auth/login","/auth/refresh","/auth/verify-otp")

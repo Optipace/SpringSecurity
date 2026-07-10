@@ -8,6 +8,8 @@ import com.example.auth_service.entity.*;
 import com.example.auth_service.enums.UserStatusEnum;
 import com.example.auth_service.repository.*;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -23,6 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
+    private static final Logger logger= LoggerFactory.getLogger(AuditService.class);
 
     public User addUser(RegisterRequest registerRequest) {
         User user = new User();
@@ -42,6 +45,8 @@ public class UserService {
         NotificationMessage notification = new NotificationMessage(user.getId(), "New user", "User" + user.getUsername() + "has been registered");
         notificationService.sendNotifications(notification);
         System.out.println("notification sent");
+        logger.info("User added successfully",user.getUsername());
+        auditService.save(user.getUsername(),"ADD USER","Added user");
         return user;
     }
 
@@ -80,16 +85,19 @@ public class UserService {
         }
         if(updateRequest.getPassword()!=null){
             user.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
+            logger.info("Password changed successfully",updateRequest.getPassword());
+            auditService.save(user.getUsername(),"PASSWORD_CHANGE","User changed password");
         }
-        auditService.save(updateRequest.getUsername(),"PASSWORD_CHANGE","User changed password");
         if(updateRequest.getRole()!=null){
             user.setRole(updateRequest.getRole());
+            System.out.println("user set"+user.getRole());
             UserRole userRole=userRoleRepository.findByUserUsername(user.getUsername()).orElseThrow(()->new RuntimeException("User role not found"));
             Role role=roleRepository.findByRoleName(updateRequest.getRole()).orElseThrow(()->new RuntimeException("Role not found"));
             userRole.setRole(role);
             userRoleRepository.save(userRole);
+            logger.info("Role changed successfully",updateRequest.getRole());
+            auditService.save(user.getUsername(),"ROLE_CHANGE","Changed role of user");
         }
-        auditService.save(updateRequest.getUsername(),"ROLE_CHANGE","Changed role of user");
         userRepository.save(user);
         UserResponse userResponse=new UserResponse();
         userResponse.setId(user.getId());
@@ -97,6 +105,8 @@ public class UserService {
         userResponse.setEmail(user.getEmail());
         userResponse.setStatus(user.getStatus());
         userResponse.setRole(user.getRole());
+        logger.info("User updated successfully",userResponse.getUsername());
+        auditService.save(userResponse.getUsername(),"UPDATE USER","Updated user");
         return userResponse;
     }
 
@@ -136,6 +146,7 @@ public class UserService {
         User user=userRepository.findById(id).orElseThrow(()->new RuntimeException("User not found"));
         user.setBlocked(true);
         userRepository.save(user);
+        logger.warn("USER BLOCKED : {}",user.getUsername());
         return "User Blocked Successfully";
     }
 

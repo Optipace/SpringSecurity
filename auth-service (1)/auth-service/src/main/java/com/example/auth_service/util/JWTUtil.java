@@ -1,9 +1,13 @@
 package com.example.auth_service.util;
 
+import com.example.auth_service.service.AuditService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
@@ -12,10 +16,15 @@ import java.util.Date;
 import java.util.function.Function;
 
 @Component
+@AllArgsConstructor
 public class JWTUtil{
+    private final AuditService auditService;
     private static final long ACCESS_TOKEN_EXPIRATION=15*60*1000;
     private final String SECRET_KEY="mysscretkeymysecretkeymysecretkey123456";
+    private static final Logger logger= LoggerFactory.getLogger(AuditService.class);
     public String generateToken(String username){
+        logger.info("Access token generated");
+        auditService.save(username,"ACCESS TOKEN GENERATION","Access token generated");
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
