@@ -1,4 +1,4 @@
-package com.example.auth_service.exception;
-
-public class UserNotFoundException {
-}
+//package com.example.auth_service.exception;
+//
+//public class UserNotFoundException {
+//}

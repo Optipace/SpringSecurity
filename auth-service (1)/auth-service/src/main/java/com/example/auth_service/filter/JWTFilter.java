@@ -1,6 +1,9 @@
 package com.example.auth_service.filter;
 
-import com.example.auth_service.security.CustomUserDetailsService;
+import com.example.auth_service.client.UserClient;
+import com.example.auth_service.dto.AuthUserResponse;
+import com.example.auth_service.dto.UserResponse;
+//import com.example.auth_service.security.CustomUserDetailsService;
 import com.example.auth_service.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -9,21 +12,30 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
-    private final CustomUserDetailsService customUserDetailsService;
+//    private final CustomUserDetailsService customUserDetailsService;
     private final JWTUtil jwtUtil;
+    private final UserClient userClient;
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+        String path=httpServletRequest.getServletPath();
+        if(path.equals("/auth/refresh")){
+            filterChain.doFilter(httpServletRequest,httpServletResponse);
+            return;
+        }
         String authHeader = httpServletRequest.getHeader("Authorization");
         System.out.println("Authorizatio header: " + authHeader);
         String token = null;
@@ -32,10 +44,17 @@ public class JWTFilter extends OncePerRequestFilter {
             token = authHeader.substring(7);
             System.out.println("Token: " + token);
             try {
-                username = jwtUtil.extractUsername(token);
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-                    if (jwtUtil.validateToken(token, userDetails)) {
+                Long userId = jwtUtil.extractUserId(token);
+                System.out.println("user id"+userId);
+                if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserResponse user=userClient.getUser(userId);
+                    System.out.println("user: "+user);
+//                    UserDetails userDetails = customUserDetailsService.loadUserById(userId);
+                    List<GrantedAuthority>authorities=List.of(new SimpleGrantedAuthority("ROLE_"+user.getRole()));
+                    System.out.println(user.getRole());
+//                    UserDetails userDetails=new org.springframework.security.core.userdetails.User(user.getUsername(),user.getPassword(),authorities);
+                    UserDetails userDetails=new org.springframework.security.core.userdetails.User(user.getUsername(),user.getPassword(),authorities);
+                    if (jwtUtil.validateToken(token)) {
                         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                         usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);

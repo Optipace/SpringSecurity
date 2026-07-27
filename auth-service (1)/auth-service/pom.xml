@@ -92,6 +92,10 @@
 			<artifactId>bucket4j-core</artifactId>
 			<version>8.10.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -154,11 +158,11 @@
 						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<source>21</source>
-					<target>21</target>
-					<compilerArgs>--enable-preview</compilerArgs>
-				</configuration>
+<!--				<configuration>-->
+<!--					<source>21</source>-->
+<!--					<target>21</target>-->
+<!--					<compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
+<!--				</configuration>-->
 			</plugin>
 		</plugins>
 	</build>

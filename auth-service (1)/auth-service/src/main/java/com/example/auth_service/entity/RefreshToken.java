@@ -1,5 +1,6 @@
 package com.example.auth_service.entity;
 
+import com.example.auth_service.dto.UserResponse;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -10,9 +11,9 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String token;
-    @OneToOne
-    @JoinColumn(name="user_id")
-    private User user;
+    private Long userId;
+    //    @OneToOne
+//    @JoinColumn(name="user_id")
     private LocalDateTime expiryDate;
     private boolean revoked;
 
@@ -30,12 +31,20 @@ public class RefreshToken {
         this.token = token;
     }
 
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
-    public void setUser(User user) {
-        this.user = user;
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
+
+//    public UserResponse getUser() {
+//        return user;
+//    }
+//    public void setUser(UserResponse user) {
+//        this.user = user;
+//    }
 
     public LocalDateTime getExpiryDate() {
         return expiryDate;

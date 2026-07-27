@@ -1,4 +1,4 @@
-package com.example.auth_service.repository;
-
-public interface UserStatusRepository {
-}
+//package com.example.auth_service.repository;
+//
+//public interface UserStatusRepository {
+//}

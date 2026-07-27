@@ -1,4 +1,4 @@
-package com.example.auth_service.exception;
-
-public class DuplicateEmailException {
-}
+//package com.example.auth_service.exception;
+//
+//public class DuplicateEmailException {
+//}

@@ -25,6 +25,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest) {
+        System.out.println("inside login method");
         authService.login(loginRequest);
         return ResponseEntity.ok("OTP sent to your mail");
     }
@@ -44,14 +45,15 @@ public class AuthController {
         return ResponseEntity.ok("Logged out successfully");
     }
 
-    @PostMapping("/send-otp")
-    public ResponseEntity<String> sendOtp(@RequestBody OtpRequest otpRequest){
-        otpService.sendOtp(otpRequest.getEmail());
-        return ResponseEntity.ok("OTP Sent Successfully");
-    }
+//    @PostMapping("/send-otp")
+//    public ResponseEntity<String> sendOtp(@RequestBody OtpRequest otpRequest){
+//        otpService.sendOtp(otpRequest.getEmail());
+//        return ResponseEntity.ok("OTP Sent Successfully");
+//    }
 
     @PostMapping("/verify-otp")
     public ResponseEntity<LoginResponse> verifyOtp(@RequestBody VerifyOtpRequest verifyOtpRequest) {
+        System.out.println("reached verify otp");
         return ResponseEntity.ok(authService.verifyOtp(verifyOtpRequest));
     }
 }

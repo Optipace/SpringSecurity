@@ -13,6 +13,7 @@ public class UserResponse {
     private Long id;
     private String username;
     private String email;
+    private String password;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatusEnum status;
@@ -39,6 +40,13 @@ public class UserResponse {
         this.email = email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public UserStatusEnum getStatus() {
         return status;
     }
@@ -54,5 +62,14 @@ public class UserResponse {
     }
 
     public UserResponse() {
+    }
+
+    public UserResponse(Long id, String username, String email, String password, UserStatusEnum status, String role, boolean blocked) {
+        this.id=id;
+        this.username=username;
+        this.email=email;
+        this.password=password;
+        this.status=status;
+        this.role=role;
     }
 }
