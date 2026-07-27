@@ -12,7 +12,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -22,13 +21,11 @@ public class UserController {
 
     @PostMapping("/admin/users")
     public User addUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        System.out.println("reached add user function");
         return userService.addUser(registerRequest);
     }
 
     @GetMapping("/admin/users/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
-        System.out.println("starting get user function");
         return ResponseEntity.ok(userService.getUser(id));
     }
 
@@ -50,13 +47,11 @@ public class UserController {
 
     @GetMapping("/users/profile")
     public ResponseEntity<UserResponse> getProfile(Authentication authentication) {
-        System.out.println("Inside get profile method");
         return ResponseEntity.ok(userService.getProfile(authentication.getName()));
     }
 
     @PutMapping("/admin/{id}/revoke-admin")
     public ResponseEntity<String> revokeAdminRole(@PathVariable Long id) {
-        System.out.println("inside revoke admin function");
         return ResponseEntity.ok(userService.revokeAdminRole(id));
     }
 
@@ -84,16 +79,13 @@ public class UserController {
 
     @DeleteMapping("/admin/roles/{roleId}/permissions/{permissionId}")
     public ResponseEntity<String> deletePermission(@PathVariable Long roleId,@PathVariable Long permissionId) {
-        System.out.println("reached delete permission method");
         userService.deletePermission(roleId,permissionId);
         return ResponseEntity.ok("Permission deleted successfully");
     }
 
     @GetMapping("/users/username/{username}")
     public ResponseEntity<AuthUserResponse> getUserByUsername(@PathVariable String username){
-        System.out.println("reached username function");
         AuthUserResponse response=userService.getUserByUsername(username);
-        System.out.println(response);
         return ResponseEntity.ok(response);
     }
 
@@ -104,7 +96,6 @@ public class UserController {
 
     @PostMapping("/users/register")
     public UserResponse register(@Valid @RequestBody RegisterRequest registerRequest) {
-        System.out.println("inside register method");
         return userService.register(registerRequest);
     }
 

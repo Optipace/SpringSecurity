@@ -7,7 +7,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
-
 import java.security.Principal;
 
 @Controller
@@ -17,10 +16,8 @@ public class NotificationSocketController {
     @MessageMapping("/register")
     @SendToUser("/queue/registration")
     public RegistrationResponse register(Principal principal, @Header("simpSessionId")String sessionId){
-        System.out.println("REGISTER METHOD CALLED");
         String username=principal.getName();
         notificationSessionRegistry.register(username,sessionId);
-        System.out.println("Registered: "+username);
         return new RegistrationResponse("REGISTERED");
     }
 }

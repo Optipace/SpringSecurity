@@ -12,7 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.bind.annotation.GetMapping;
 
 @Configuration
 @AllArgsConstructor
@@ -35,9 +34,6 @@ public class SecurityConfig {
                 .csrf(csrf->csrf.disable())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(user->user
-//                        .requestMatchers("/auth/register","/auth/login","/auth/refresh","/auth/verify-otp","/ws","/ws/**")
-//                        .permitAll()
-//                        .requestMatchers("/auth/profile").authenticated()
                         .requestMatchers(HttpMethod.POST,"/admin/users").hasAuthority("CREATE_USER")
                         .requestMatchers(HttpMethod.DELETE,"/admin/users/{id}").hasAuthority("DELETE_USER")
                         .requestMatchers(HttpMethod.PATCH,"/admin/users/{id}").hasAuthority("UPDATE_USER")

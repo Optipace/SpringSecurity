@@ -2,7 +2,6 @@ package com.example.notification_service.security;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
-
 import javax.crypto.SecretKey;
 import java.util.Base64;
 import io.jsonwebtoken.Jwts;

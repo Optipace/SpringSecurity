@@ -22,12 +22,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain)throws ServletException, IOException{
         String path=httpServletRequest.getRequestURI();
-        System.out.println("Rate limit filter called");
         String ip=httpServletRequest.getRemoteAddr();
         if(path.equals("/auth/login") || path.equals("/auth/verify-otp")) {
             Bucket bucket = cache.computeIfAbsent(ip, k -> createBucket());
-            System.out.println("ip: " + ip);
-            System.out.println("available token: " + bucket.getAvailableTokens());
             if (bucket.tryConsume(1)) {
                 filterChain.doFilter(httpServletRequest, httpServletResponse);
             } else {

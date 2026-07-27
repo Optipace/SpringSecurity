@@ -9,10 +9,8 @@ import com.example.user_service.repository.*;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -20,18 +18,13 @@ import java.util.List;
 public class UserService {
     private final RolePermissionRepository rolePermissionRepository;
     private final PermissionRepository permissionRepository;
-//    private final NotificationService notificationService;
     private final NotificationClient notificationClient;
     private final UserRoleRepository userRoleRepository;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-//    private final AuditService auditService;
     private final AuditClient auditClient;
     private static final Logger logger= LoggerFactory.getLogger(AuditClient.class);
-//    @Autowired
-//    private org.springframework.cloud.client.discovery.DiscoveryClient discoveryClient;
-
     public User addUser(RegisterRequest registerRequest) {
         User user = new User();
         user.setUsername(registerRequest.getUsername());
@@ -41,23 +34,13 @@ public class UserService {
         Role role=roleRepository.findByRoleName(registerRequest.getRole()).orElseThrow(()->new RuntimeException("Role not found"));
         user.setRole(role);
         userRepository.save(user);
-        System.out.println("User got saved" + user.getId());
-//        Role role = roleRepository.findByRoleName("USER").orElseThrow(() -> new RuntimeException("Role not found"));
         UserRole userRole = new UserRole();
         userRole.setUser(user);
         userRole.setRole(role);
         userRoleRepository.save(userRole);
-        System.out.println("sending web socket notification");
         NotificationMessage notification = new NotificationMessage(user.getUsername(), "New user", "User" + user.getUsername() + "has been registered");
-//        String result=notificationService.sendPrivateNotification(notification);
         String result= notificationClient.send(notification);
-        System.out.println(result);
-        System.out.println("notification sent");
         logger.info("User added successfully",user.getUsername());
-//        System.out.println("Services: "+discoveryClient.getServices());
-//        System.out.println("AUDIT-SERVICE instances: "+discoveryClient.getInstances("AUDIT-SERVICE"));
-//        System.out.println("audit-service instances: "+discoveryClient.getInstances("audit-service"));
-//        auditService.save(user.getUsername(),"ADD USER","Added user");
         auditClient.save(new AuditRequest(user.getUsername(),"ADD USER","Added user"));
         return user;
     }
@@ -104,7 +87,6 @@ public class UserService {
         }
         if(updateRequest.getRole()!=null){
             user.setRole(updateRequest.getRole());
-            System.out.println("user set"+user.getRole());
             UserRole userRole=userRoleRepository.findByUserUsername(user.getUsername()).orElseThrow(()->new RuntimeException("User role not found"));
             Role role=roleRepository.findByRoleName(updateRequest.getRole().getRoleName()).orElseThrow(()->new RuntimeException("Role not found"));
             userRole.setRole(role);
@@ -143,7 +125,6 @@ public class UserService {
         userResponse.setPassword(user.getPassword());
         userResponse.setStatus(user.getStatus());
         userResponse.setRole(user.getRole().getRoleName());
-        System.out.println("user response: "+userResponse);
         return userResponse;
     }
 
@@ -187,14 +168,11 @@ public class UserService {
     }
 
     public void deletePermission(Long roleId,Long permissionId) {
-        System.out.println("Role id: "+roleId);
-        System.out.println("Permission id: "+permissionId);
         RolePermission rolePermission=rolePermissionRepository.findByRoleIdAndPermissionId(roleId,permissionId).orElseThrow();
         rolePermissionRepository.delete(rolePermission);
     }
 
     public UserResponse register(RegisterRequest registerRequest){
-        System.out.println("inside user service");
         User user=new User();
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
@@ -203,9 +181,6 @@ public class UserService {
         Role role=roleRepository.findByRoleName(registerRequest.getRole()).orElseThrow(()->new RuntimeException("Role not found"));
         user.setRole(role);
         userRepository.save(user);
-        System.out.println("Role from request: "+registerRequest.getRole());
-        System.out.println("After save role: "+user.getRole().getRoleName());
-        System.out.println("Saved role id: "+user.getRole().getId());
         UserRole userRole=new UserRole();
         userRole.setUser(user);
         userRole.setRole(role);
@@ -217,6 +192,7 @@ public class UserService {
         userResponse.setId(user.getId());
         userResponse.setUsername(user.getUsername());
         userResponse.setEmail(user.getEmail());
+        userResponse.setPassword(user.getPassword());
         userResponse.setStatus(user.getStatus());
         userResponse.setRole(user.getRole().getRoleName());
         return userResponse;
@@ -231,15 +207,7 @@ public class UserService {
     }
 
     public UserResponse getUserByEmail(String email) {
-        System.out.println("reached user service");
         User user=userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not found"));
-        System.out.println(user);
-        System.out.println(user.getId());
-        System.out.println(user.getUsername());
-        System.out.println(user.getEmail());
-        System.out.println(user.getPassword());
-        System.out.println(user.getStatus());
-        System.out.println(user.getRole());
         return new UserResponse(user.getId(), user.getUsername(),user.getEmail(),user.getPassword(),user.getStatus(),user.getRole().getRoleName(),user.isBlocked());
     }
 }

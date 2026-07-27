@@ -27,6 +27,7 @@ public class UpdateRequest {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatusEnum status;
+
     private Role role;
 
     public Long getId() {

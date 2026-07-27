@@ -1,9 +1,7 @@
 package com.example.auth_service.filter;
 
 import com.example.auth_service.client.UserClient;
-import com.example.auth_service.dto.AuthUserResponse;
 import com.example.auth_service.dto.UserResponse;
-//import com.example.auth_service.security.CustomUserDetailsService;
 import com.example.auth_service.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -25,7 +23,6 @@ import java.util.List;
 @Component
 @AllArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
-//    private final CustomUserDetailsService customUserDetailsService;
     private final JWTUtil jwtUtil;
     private final UserClient userClient;
 
@@ -45,21 +42,14 @@ public class JWTFilter extends OncePerRequestFilter {
             System.out.println("Token: " + token);
             try {
                 Long userId = jwtUtil.extractUserId(token);
-                System.out.println("user id"+userId);
                 if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserResponse user=userClient.getUser(userId);
-                    System.out.println("user: "+user);
-//                    UserDetails userDetails = customUserDetailsService.loadUserById(userId);
                     List<GrantedAuthority>authorities=List.of(new SimpleGrantedAuthority("ROLE_"+user.getRole()));
-                    System.out.println(user.getRole());
-//                    UserDetails userDetails=new org.springframework.security.core.userdetails.User(user.getUsername(),user.getPassword(),authorities);
                     UserDetails userDetails=new org.springframework.security.core.userdetails.User(user.getUsername(),user.getPassword(),authorities);
                     if (jwtUtil.validateToken(token)) {
                         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                         usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                        System.out.println("Authentication set: " + SecurityContextHolder.getContext().getAuthentication());
-                        System.out.println("Authorities: " + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
                     }
                 }
             } catch (ExpiredJwtException expiredJwtExpired) {

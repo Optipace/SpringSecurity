@@ -1,6 +1,5 @@
 package com.example.user_service.dto;
 
-import com.example.user_service.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +14,6 @@ public class AuthUserResponse {
     private Long roleId;
 
     public AuthUserResponse() {
-
     }
 
     public String getPassword() {

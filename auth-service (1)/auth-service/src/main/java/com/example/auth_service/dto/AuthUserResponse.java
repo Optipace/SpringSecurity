@@ -1,7 +1,5 @@
 package com.example.auth_service.dto;
 
-//import com.example.auth_service.entity.Role;
-
 import com.example.auth_service.enums.UserStatusEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;

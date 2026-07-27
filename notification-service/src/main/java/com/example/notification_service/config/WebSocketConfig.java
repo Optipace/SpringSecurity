@@ -16,7 +16,6 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-
 import java.security.Principal;
 import java.util.List;
 
@@ -25,24 +24,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final JWTUtil jwtUtil;
-//    private final CustomUserDetailsService customUserDetailsService;
-
     @Override
     public void configureMessageBroker(MessageBrokerRegistry messageBrokerRegistry) {
         messageBrokerRegistry.enableSimpleBroker("/topic", "/queue");
         messageBrokerRegistry.setApplicationDestinationPrefixes("/app");
     }
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry stompEndpointRegistry) {
         stompEndpointRegistry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*");
     }
+
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
             @Override
             public @Nullable Message<?> preSend(Message<?> message, MessageChannel channel) {
-                System.out.println("inside websocket interceptor");
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if(accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())){
                     List<String> authorization=accessor.getNativeHeader("Authorization");
@@ -55,22 +53,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     }
                     String token=bearerToken.substring(7);
                     try{
-//                        System.out.println("token: "+token);
-//                        UserDetails userDetails=customUserDetailsService.loadUserByUsername(jwtUtil.extractUsername(token));
-//                        System.out.println("user loaded");
-//                        jwtUtil.validateToken(token,userDetails);
-//                        String username = jwtUtil.extractUsername(token);
-//                        System.out.println("username"+username);
-//                        accessor.setUser(new Principal() {
-//                            @Override
-//                            public String getName() {
-//                                return username;
-//                            }
                         if(!jwtUtil.validateToken(token)){
                             throw new MessageDeliveryException("Invalid JWT Token");
                         }
                         Long userId= jwtUtil.extractUserId(token);
-                        System.out.println("User Id: "+userId);
                         accessor.setUser(new Principal() {
                             @Override
                             public String getName() {

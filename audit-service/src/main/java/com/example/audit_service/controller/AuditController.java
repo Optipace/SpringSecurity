@@ -1,7 +1,6 @@
 package com.example.audit_service.controller;
 
 import com.example.audit_service.dto.AuditRequest;
-import com.example.audit_service.entity.AuditLog;
 import com.example.audit_service.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

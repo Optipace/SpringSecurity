@@ -25,7 +25,6 @@ public class User {
     private boolean blocked=false;
 
     public User() {
-
     }
 
     public Long getId() {
